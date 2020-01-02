@@ -82,8 +82,12 @@
         </el-form-item>
         <el-form-item label="录入人" prop="enteringer" label-width="80px">
           <el-select placeholder="请选择" v-model="formData.enteringer">
-            <el-option label="区域一" value="shanghai"></el-option>
-            <el-option label="区域二" value="beijing"></el-option>
+              <el-option
+              :label="item.username"
+              v-for="item in enteringer_list"
+              :key="item.id"
+              :value="item.id"
+            ></el-option>
           </el-select>
         </el-form-item>
         <el-form-item
@@ -95,35 +99,43 @@
             placeholder="请选择"
             v-model="formData.second_level_directory"
           >
-            <el-option label="区域一" value="shanghai"></el-option>
-            <el-option label="区域二" value="beijing"></el-option>
+              <el-option
+              :label="item.label"
+              v-for="item in directorys_list"
+              :key="item.id"
+              :value="item.id"
+            ></el-option>
           </el-select>
         </el-form-item>
-        <el-from-item>
+        <el-form-item>
           <el-row style="margin-bottom: 30px" type="flex" justify="center">
             <el-button>清除</el-button>
             <el-button type="primary">搜索</el-button>
           </el-row>
-        </el-from-item>
+        </el-form-item>
       </el-form>
       <el-table :data="tableData">
-        <el-table-column prop="date" label="序号" min-width="150">
+        <el-table-column prop="id" label="序号" min-width="150">
         </el-table-column>
-        <el-table-column prop="name" label="试题" min-width="220">
+        <el-table-column prop="number" label="试题编号" min-width="220">
         </el-table-column>
-        <el-table-column prop="province" label="学科" min-width="120">
+        <el-table-column prop="subjectID" label="学科" min-width="120">
         </el-table-column>
         <el-table-column prop="city" label="题型" min-width="120">
         </el-table-column>
-        <el-table-column prop="address" label="题干" min-width="200">
+        <el-table-column prop="question" label="题干" min-width="200">
         </el-table-column>
-        <el-table-column prop="zip" label="录入时间" min-width="180">
+        <el-table-column prop="addDate" label="录入时间" min-width="180">
         </el-table-column>
-        <el-table-column prop="zip" label="难度" min-width="120">
+        <el-table-column prop="direction" :formatter="questionFormatter" label="难度" min-width="120">
         </el-table-column>
-        <el-table-column prop="zip" label="录入人" min-width="120">
+        <el-table-column prop="creator" label="录入人" min-width="120">
         </el-table-column>
-        <el-table-column prop="zip" label="操作" min-width="200">
+        <el-table-column  label="操作" min-width="200">
+          <el-button type="text">预览</el-button>
+          <el-button type="text">修改</el-button>
+          <el-button type="text">删除</el-button>
+          <el-button type="text">加入精选</el-button>
         </el-table-column>
       </el-table>
       <el-row type="flex" justify="center">
@@ -134,6 +146,7 @@
           :current-page="page.current_page"
           :page-size="page.pageSize"
           style="margin-top:30px;"
+          @current-change="chang_page"
         >
         </el-pagination>
       </el-row>
@@ -145,6 +158,8 @@
 import { list as questionslist } from "../../api/hmmm/questions";
 import { list as subjects_list } from "../../api/hmmm/subjects";
 import { list as tags_list } from "../../api/hmmm/tags";
+import { simple as user_simple } from "../../api/base/users";
+import { simple as directorys_simple } from "../../api/hmmm/directorys";
 import { difficulty as difficultylist, questionType as questionTypelist, direction as directionlists  } from "../../api/hmmm/constants";
 export default {
   data() {
@@ -169,6 +184,8 @@ export default {
       questionType:"",//问题类型
       directionlist:"",//方向
       difficulty_list:'',//难度
+      enteringer_list:'',//录入人列表
+      directorys_list:'',//二级目录列表
       page: {
         counts: 2000, //总记录数
         pageSize: 10, //一页多少个
@@ -195,8 +212,26 @@ export default {
       ]
     };
   },
+methods: {
+  questionFormatter(row, column, cellValue) {
+      let result = this.difficulty_list.filter(item => item.value == cellValue);
+      return result.length ? result[0].label : "未知";
+    },
+    async chang_page(new_page){
+      this.page.current_page=new_page
+      let data ={
+        page:this.page.current_page,
+        pagesize:this.page.pageSize,
+      }
+      let result = await questionslist(data)
+      this.tableData=result.data.items
+    }
+},
   created() {
-    questionslist();
+    questionslist().then((result)=>{
+      this.tableData=result.data.items
+      this.page.counts=result.data.counts
+    })
     tags_list().then(result => {
       this.taglist = result.data.items;
     }),
@@ -206,6 +241,13 @@ export default {
       this.directionlist=directionlists
       this.difficulty_list=difficultylist
       this.questionType_list=questionTypelist
+       user_simple().then((result)=>{
+           this.enteringer_list=result.data 
+           
+       })
+       directorys_simple().then((result)=>{
+          this.directorys_list=result.data
+       })
   }
 };
 </script>
