@@ -22,7 +22,9 @@
         <template slot-scope="obj">{{obj.row.addDate | parseTimeByString}}</template>
       </el-table-column>
       <el-table-column prop="totals" label="面试题数量"></el-table-column>
-      <el-table-column prop="state" label="状态"></el-table-column>
+      <el-table-column prop="state" label="状态">
+        <template slot-scope="obj">{{ obj.row.state===1?"开启":"屏蔽" }}</template>
+      </el-table-column>
       <el-table-column label="操作">
         <template slot-scope="obj">
           <el-button type="text">修改</el-button>
@@ -67,12 +69,14 @@ export default {
     };
   },
   methods: {
+    // 状态
+
     // 修改状态  接收整行数据
     async chageState(row) {
-       await this.$confirm("您确定要改变状态吗");
-       state({id:row.id,state:row.state ===1?0:1})
-        this.$message({ message: "修改状态成功", type: "success" });
-        this.getdata();
+      await this.$confirm("您确定要改变状态吗");
+      state({ id: row.id, state: row.state === 1 ? 0 : 1 });
+      this.$message({ message: "修改状态成功", type: "success" });
+      this.getdata();
     },
     // 定义删除方法
     async delItem(id) {
@@ -90,7 +94,7 @@ export default {
         page: this.page.currentPage, // 默认请求第一页
         pagesize: this.page.pageSize // 每页多少条
       });
-      // console.log(result);
+      console.log(result);
 
       this.page.total = result.data.counts;
       this.list = result.data.items;
