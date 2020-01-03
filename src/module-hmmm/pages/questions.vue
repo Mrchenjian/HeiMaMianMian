@@ -119,12 +119,12 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item>
           <el-row style="margin-bottom: 30px" type="flex" justify="center">
+        <el-form-item>
             <el-button @click="clear" prop="112">清除</el-button>
-            <el-button type="primary" prop="123">搜索</el-button>
-          </el-row>
+            <el-button @click="serch" type="primary" prop="123">搜索</el-button>
         </el-form-item>
+          </el-row>
       </el-form>
       <el-table :data="tableData">
         <el-table-column prop="id" label="序号" min-width="150">
@@ -133,14 +133,15 @@
         </el-table-column>
         <el-table-column prop="subjectID" label="学科" min-width="120">
         </el-table-column>
-        <el-table-column prop="city" label="题型" min-width="120">
+        <el-table-column prop="questionType"  :formatter="typeFormatter" label="题型" min-width="120">
         </el-table-column>
         <el-table-column prop="question" label="题干" min-width="200">
         </el-table-column>
         <el-table-column prop="addDate" label="录入时间" min-width="180">
+           <template slot-scope="obj">{{ obj.row.addDate | parseTimeByString}}</template>
         </el-table-column>
         <el-table-column
-          prop="direction"
+          prop="difficulty"
           :formatter="questionFormatter"
           label="难度"
           min-width="120"
@@ -239,7 +240,7 @@ export default {
       subjectlist: "", //学科列表
       taglist: "", //标签列表
       difficulty: "", //难易程度
-      questionType: "", //问题类型
+      questionType_list: "", //问题类型
       directionlist: "", //方向
       difficulty_list: "", //难度
       enteringer_list: "", //录入人列表
@@ -257,8 +258,22 @@ export default {
     };
   },
   methods: {
+     async serch(){
+      let data = {
+        page: this.page.current_page,
+        pagesize: this.page.pageSize,
+        ...this.formData
+      }
+      console.log(data);
+      let result =await questionslist(data)
+       this.tableData = result.data.items;
+    },
     questionFormatter(row, column, cellValue) {
       let result = this.difficulty_list.filter(item => item.value == cellValue);
+      return result.length ? result[0].label : "未知";
+    },
+    typeFormatter(row, column, cellValue) {
+      let result = this.questionType_list.filter(item => item.value == cellValue);
       return result.length ? result[0].label : "未知";
     },
     async chang_page(new_page) {
@@ -279,15 +294,26 @@ export default {
     async edit(id) {
       this.$router.push(`/questions/new?id=${id}`);
     },
-    deleted(id) {
-      this.$confirm("确定？").then(() => {
-        remove({ id });
+   async deleted(id) {
+      await this.$confirm("确定？")
+        await remove({ id });
         this.$message({ type: "success", message: "删除成功" });
-      });
-      questionslist().then(result => {
+      this.git_list();
+      
+        // this.$confirm("确定？")
+        // remove({ id })
+        // this.$message({ type: "success", message: "删除成功" }
+
+        
+        // let result = questionslist()
+        // this.tableData = result.data.items
+        // this.page.counts = result.data.counts
+      
+    },
+    async git_list(){
+       let result= await questionslist()
         this.tableData = result.data.items;
         this.page.counts = result.data.counts;
-      });
     },
     preview() {
       //预览事件
