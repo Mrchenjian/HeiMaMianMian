@@ -1,16 +1,20 @@
 <template>
-  <div class="dashboard-container">
-    <div class="app-container">目录管理</div>
-  </div>
+  <div>目录</div>
 </template>
 
 <script>
 export default {
-  name: 'DirectorysList',
+  name: "DirectorysList",
   data() {
-    return {}
+    return {
+      searchForm:{
+        directoryName:'', // 目录名称
+        state:null //状态
+      },
+      status:status
+    };
   }
-}
+};
 </script>
 
 <style scoped>
