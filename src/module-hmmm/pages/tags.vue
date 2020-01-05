@@ -1,5 +1,5 @@
 <template>
-  <el-card>
+  <el-card> 
     <!-- 按钮 -->
     <el-row class="B-top" type="flex" justify="start" style="margin:0 0 15px 0">
       <el-button>新建标签</el-button>
